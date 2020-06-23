@@ -13,5 +13,3 @@
       linear_extrude(height=height)
         battery_symbol_2D(size=size, line_width = line_width);  
  }
-
-battery_symbol(centerX=true);

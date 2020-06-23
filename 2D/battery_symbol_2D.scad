@@ -9,23 +9,25 @@
      
     
      difference() {
-         square([sizeX, size*8/10]);
+         square([sizeX, size*9/10]);
          translate([line_width,line_width,-1])
-            square([sizeX-2*line_width, size*8/10-2*line_width]);
+            square([sizeX-2*line_width, size*9/10-2*line_width]);
      }
-     
-     
-     noseWidth = sizeX/5*1.5;
-     
-     translate([(sizeX-noseWidth)/2, size*8/10-line_width+0.001])
+          
+     noseWidth = sizeX/5*1.8;
+     noseHeight = size/10;
+          
+     translate([(sizeX-noseWidth)/2, size*9/10])
      difference() {
-         square([noseWidth, size/5-0.001]);
-         translate([line_width,line_width])
-            square([noseWidth-2*line_width, size/10-2*line_width]);
+         translate([0, 0.001])
+            square([noseWidth, noseHeight+0.001]);
+
+         translate([line_width,-line_width])
+            square([noseWidth-2*line_width, noseHeight]);
      }
      
      // painting flash
-     ySegment = size*8/10/4;
+     ySegment = size*9/10/4;
      xSegment = sizeX / 3;
      
      polygon(points=[
@@ -39,3 +41,4 @@
  }
   
  }
+

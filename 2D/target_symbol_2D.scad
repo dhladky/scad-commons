@@ -1,15 +1,15 @@
 // draws a target symbol (2D)
 // parameters:
 // size - size of the symbol
-// line_width - width of the drawing line
+// $line_width - width of the drawing line
 
-module target_symbol_2D(size=10, line_width=0.5 ) {
+module target_symbol_2D(size=10) {
+    include <../common_defaults.scad>
     
     targetFraction = size / 12;
-        
 
-   square([size, line_width], center=true);
-   square([line_width, size], center=true);
+   square([size, $line_width], center=true);
+   square([$line_width, size], center=true);
 
    circle(r=targetFraction);
 

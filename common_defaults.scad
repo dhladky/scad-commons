@@ -1,0 +1,1 @@
+$line_width=is_undef($line_width)?0.5:$line_width;

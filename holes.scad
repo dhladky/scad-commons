@@ -152,42 +152,87 @@ module hole_with_finger_holes(position=[0,0], size, fingers_align_x=false, depth
     
 }
 
-//
-module horizontal_round_hole(position=[0,0], radius, fingers_align_x=false,  depth=-1, bottom_thickness=2, bury=true, center=false, centerX=false, centerY=false) {
-
+// A hole in the shape of lying cylinder. 
+// Parameters:
+//   position - position of the hole [x,y]
+//   radius - radius radius of the cylinder
+//   diameter - diameter of the cylinder (either radius or diamter must be supplied)
+//   length - length of the hole
+//   align_x - if true, the hole will be oriented around the X axis. Otherwise Y axis
+//   centerX - if true, center horizontally
+//   centerY - if true, center vertically
+//   center - if true, center both horizontally and vertically
+module horizontal_round_hole(position=[0,0], radius, diameter, length, align_x=false, center=false, centerX=false, centerY=false) {
     include <holes_default_parameters.scad>
 
+    assert(is_undef(radius)||is_undef(diameter), "Either radius or diameter must be defined, but not both!");
+    assert(!(is_undef(radius)&&is_undef(diameter)), "Either radius or diameter must be defined!");
+    
+    r=is_undef(radius)?diameter/2:radius;
+    
+    if(align_x) {
+        translate([ (center || centerX) ? position[0] : position[0] + length/2, (center || centerY) ? position[1] : position[1] + r, $holes_bottom_part_top])
+           rotate([0,90 ,0])
+              cylinder(h=length, r=r, center=true); 
+    } else {
+        translate([ (center || centerX) ? position[0] : position[0] + r, (center || centerY) ? position[1] : position[1] + length/2, $holes_bottom_part_top])
+           rotate([90,0 ,0])
+              cylinder(h=length, r=r, center=true); 
+    }    
+    
+    
+}
 
+// A hole in the shape of standing cylinder. 
+// Parameters:
+//   position - position of the hole [x,y]
+//   radius - radius radius of the cylinder
+//   diameter - diameter of the cylinder (either radius or diamter must be supplied)
+//   depth - how deep the hole shall be. If not used, the hole will go to bottom of the box. 
+//   align_x - if true, the hole will be oriented around the X axis. Otherwise Y axis
+//   centerX - if true, center horizontally
+//   centerY - if true, center vertically
+//   center - if true, center both horizontally and vertically
+module vertical_round_hole(position=[0,0], radius, diameter, depth=-1, align_x=false, center=false, centerX=false, centerY=false) {
+    include <holes_default_parameters.scad>
+
+    assert(is_undef(radius)||is_undef(diameter), "Either radius or diameter must be defined, but not both!");
+    assert(!(is_undef(radius)&&is_undef(diameter)), "Either radius or diameter must be defined!");
+    r=is_undef(radius)?diameter/2:radius;
+    
+    translate([(center || centerX)?position[0]:position[0]+r, (center || centerY)?position[1]:position[1]+r, depth == -1 ? $holes_bottom_thickness : $holes_bottom_part_top-depth])  
+       cylinder(h=($holes_bottom_top_overlap+(depth==-1 ? $holes_bottom_part_top-$holes_bottom_thickness: depth)), r=r);   
 }
 
 
-use <2D/battery_symbol_2D.scad>
-use <2D/dice_symbol_2D.scad>
-use <2D/target_symbol_2D.scad>
+//use <2D/battery_symbol_2D.scad>
+//use <2D/dice_symbol_2D.scad>
+//use <2D/target_symbol_2D.scad>
+//
 
-
-$holes_bottom_thickness=4;
-$holes_bottom_part_top=30;
-//$holes_bottom_top_overlap=10;
-//$holes_finger_hole_radius=30;
-
-//$line_width=2;
-hole_with_finger_holes(size=[20, 40], fingers_align_x=true) {
-    battery_symbol_2D($line_width=0.5);
-};
-
-hole(size=[20, 40], position=[40, 0]) {
-    battery_symbol_2D($line_width=0.5);
-};
-
-simple_hole(size=[20, 40], position=[80, 0]);
-
-
-hole(size=[20, 40], position=[120, 0]) {
-    dice_symbol_2D($line_width=0.2);
-};
-
-hole(size=[20, 40], position=[160, 0]) {
-    target_symbol_2D();
-};
-
+//$holes_bottom_thickness=4;
+//$holes_bottom_part_top=30;
+////$holes_bottom_top_overlap=10;
+////$holes_finger_hole_radius=30;
+//
+////$line_width=2;
+////hole_with_finger_holes(size=[20, 40], fingers_align_x=true) {
+////    battery_symbol_2D($line_width=0.5);
+////};
+//
+//hole(size=[20, 40], position=[40, 0]) {
+//    battery_symbol_2D($line_width=0.5);
+//};
+//
+//simple_hole(size=[20, 40], position=[80, 0]);
+//
+//
+//hole(size=[20, 40], position=[120, 0]) {
+//    dice_symbol_2D($line_width=0.2);
+//};
+//
+//hole(size=[20, 40], position=[160, 0]) {
+//    target_symbol_2D();
+//};
+//
+////vertical_round_hole(position=[0,0], depth=14, radius=10, center=true);

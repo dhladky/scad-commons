@@ -75,7 +75,7 @@ module simple_hole(position=[0,0], size, depth=-1, center=false, centerX=false, 
 
 
 
-// A rectangular hole in the organizer with a picture. A centered 2D
+// A rectangular hole in the organizer with a picture and adjusted bottom. A centered 2D
 // object(s) may be enclosed in the call so it will become 
 // rendered on the bottom of the hole. Based on bury parameter 
 // the picture will be buried in the box (true) or go up in the hole by $line_width.
@@ -106,7 +106,7 @@ module hole(position=[0,0], size, depth=-1,  bury=true, center=false, centerX=fa
             children();
     } else {
         difference() {
-            hole(position, size, depth, $holes_bottom_thickness, center, centerX, centerY);
+            simple_hole(position, size, depth, $holes_bottom_thickness, center, centerX, centerY);
             
           translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, hole_bottom-0.01])
                 linear_extrude(height=$line_width+0.01)  
@@ -115,6 +115,92 @@ module hole(position=[0,0], size, depth=-1,  bury=true, center=false, centerX=fa
     }
     
 }
+
+
+// A cubic hole in the organizer with a picture. Unlike "hole" it is pure cube with flat bottom. A centered 2D
+// object(s) may be enclosed in the call so it will become 
+// rendered on the bottom of the hole. Based on bury parameter 
+// the picture will be buried in the box (true) or go up in the hole by $line_width.
+//
+// 
+// parameters:
+// position : X,Y position of the hole in X,Y axis
+// size - size of the hole (X, Y axis)
+// depth - optional depth - if used, the hole will have this depth. 
+//    $holes_bottom_thickness variable will be ignored if depth is used
+// bury - true by default. If false, the picture will be rendered upwards
+// $holes_bottom_top_overlap - extend the hole above the 'top' so that diffs work properly by this value
+// centerX - if true, center horizontally
+// centerY - if true, center vertically
+// center - if true, center both horizontally and vertically
+
+module cubic_hole(position=[0,0], size, depth=-1,  bury=true, center=false, centerX=false, centerY=false) {
+    
+    include <holes_default_parameters.scad>
+        
+    hole_bottom = (depth==-1) ? $holes_bottom_thickness : $holes_bottom_part_top - depth;
+
+    if(bury) {      
+    translate([center || centerX ? position[0]-size[0]/2:position[0], center || centerY ? position[1]-size[1]/2:position[1], hole_bottom])    
+      cube([size[0], size[1], $holes_bottom_part_top-hole_bottom+$holes_bottom_top_overlap]);
+        
+          
+      translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, $holes_bottom_thickness-$line_width])  
+         linear_extrude(height=$line_width+0.01)  
+            children();
+    } else {
+        difference() {
+            translate([center || centerX ? position[0]-size[0]/2:position[0], center || centerY ? position[1]-size[1]/2:position[1], hole_bottom])    
+                  cube([size[0], size[1], $holes_bottom_part_top-hole_bottom+$holes_bottom_top_overlap]);            
+          translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, hole_bottom-0.01])
+                linear_extrude(height=$line_width+0.01)  
+                    children();
+        }
+    }
+    
+}
+
+
+// A cubic hole in the organizer with a picture and space to put finers when drawing tokens. A centered 2D
+// object(s) may be enclosed in the call so it will become 
+// rendered on the bottom of the hole. Based on bury parameter 
+// the picture will be buried in the box (true) or go up.
+//
+// 
+// parameters:
+// position : X,Y position of the hole in X,Y axis
+// size - size of the hole (X, Y axis)
+// fingers_align_x - the finger hole to be aligned with X axis (if false, with Y axis)
+// depth - optional depth - if used, the hole will have this depth. 
+//    $holes_bottom_thickness variable will be ignored if depth is used
+// bury - true by default. If false, the picture will be rendered upwards
+// centerX - if true, center horizontally
+// centerY - if true, center vertically
+// center - if true, center both horizontally and vertically
+// $holes_bottom_part_top - top of the bottom part of the box
+// $holes_finger_hole_radius - radius of the hole for fingers 
+// $holes_finger_hole_extend - how far should the finger hole reach
+
+module cubic_hole_with_finger_holes(position=[0,0], size, fingers_align_x=false, depth=-1, bury=true, center=false, centerX=false, centerY=false) {
+    
+    include <holes_default_parameters.scad>
+    
+    cubic_hole(position, size, depth, bury, center, centerX, centerY) {
+        children();
+    };
+    
+    translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top])
+    if(fingers_align_x) {
+        rotate([0,90,0])
+           cylinder(h=size[0]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+    } else {
+        rotate([90,0,0])
+           cylinder(h=size[1]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+    }
+    echo($holes_finger_hole_extend=$holes_finger_hole_extend, $holes_finger_hole_radius=$holes_finger_hole_radius);
+    
+}
+
 
 // A hole in the organizer with a picture and space to put finers when drawing tokens. A centered 2D
 // object(s) may be enclosed in the call so it will become 
@@ -132,6 +218,9 @@ module hole(position=[0,0], size, depth=-1,  bury=true, center=false, centerX=fa
 // centerX - if true, center horizontally
 // centerY - if true, center vertically
 // center - if true, center both horizontally and vertically
+// $holes_bottom_part_top - top of the bottom part of the box
+// $holes_finger_hole_radius - radius of the hole for fingers 
+// $holes_finger_hole_extend - how far should the finger hole reach
 
 module hole_with_finger_holes(position=[0,0], size, fingers_align_x=false, depth=-1, bury=true, center=false, centerX=false, centerY=false) {
     
@@ -206,6 +295,12 @@ module vertical_round_hole(position=[0,0], radius, diameter, depth=-1, align_x=f
 
 
 //use <2D/battery_symbol_2D.scad>
+////$holes_bottom_part_top=30;
+//cubic_hole_with_finger_holes(size=[21, 13], position=[0, 0]) {
+////    battery_symbol_2D($line_width=0.5);
+//};
+
+
 //use <2D/dice_symbol_2D.scad>
 //use <2D/target_symbol_2D.scad>
 //

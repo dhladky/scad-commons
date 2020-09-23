@@ -30,9 +30,9 @@ module simple_hole(position=[0,0], size, depth=-1, center=false, centerX=false, 
     
     hole_bottom = (depth==-1) ? $holes_bottom_thickness : $holes_bottom_part_top - depth;
 
-    cornerX = min([size[0]/8, 5]); // 5 mm or eight of the hole
-    cornerY = min([size[1]/8, 5]); // 5 mm or eight of the hole
-    cornerZ = hole_bottom+min([($holes_bottom_part_top-hole_bottom)/8, 3]); // 3 mm or eight of the hole
+    cornerX = min([size[0]/8, 10]); // 5 mm or eight of the hole
+    cornerY = min([size[1]/8, 10]); // 5 mm or eight of the hole
+    cornerZ = hole_bottom+min([($holes_bottom_part_top-hole_bottom)/8, 5]); // 5 mm or eight of the hole
  
     points=[
        // bottom
@@ -101,12 +101,12 @@ module hole(position=[0,0], size, depth=-1,  bury=true, center=false, centerX=fa
     if(bury) {
       simple_hole(position, size, depth,  center, centerX, centerY);
     
-      translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, $holes_bottom_thickness-$line_width])  
+      translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, hole_bottom-$line_width])  
          linear_extrude(height=$line_width+0.01)  
             children();
     } else {
         difference() {
-            simple_hole(position, size, depth, $holes_bottom_thickness, center, centerX, centerY);
+          simple_hole(position, size, depth, center, centerX, centerY);
             
           translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, hole_bottom-0.01])
                 linear_extrude(height=$line_width+0.01)  
@@ -145,7 +145,7 @@ module cubic_hole(position=[0,0], size, depth=-1,  bury=true, center=false, cent
       cube([size[0], size[1], $holes_bottom_part_top-hole_bottom+$holes_bottom_top_overlap]);
         
           
-      translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, $holes_bottom_thickness-$line_width])  
+      translate([center||centerX ? position[0] : size[0]/2+position[0], center||centerY?position[1]:position[1]+size[1]/2, hole_bottom-$line_width])  
          linear_extrude(height=$line_width+0.01)  
             children();
     } else {

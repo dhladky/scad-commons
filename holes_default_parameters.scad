@@ -1,7 +1,7 @@
 include <common_defaults.scad>
 
 // check common asserts
-assert(!is_undef($holes_bottom_part_top), "$holes_bottom_top parameter is not defined!");
+assert(!is_undef($holes_bottom_part_top), "$holes_bottom_part_top parameter is not defined!");
 assert(len(position)==2, "position should be defined as [x,y]");
 
 // set default values

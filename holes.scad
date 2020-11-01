@@ -7,7 +7,7 @@
 // $holes_bottom_top_overlap - the holes in the bottom part will overlap the bottom part by this value (default 1 mm)
 // $holes_finger_hole_radius - finger hole radius (default 5 mm)
 // $holes_finger_hole_extend - the length of the finger hole on each side of the hole (default 5 mm)
-
+// $holes_finger_additional_depth - bury the finger hole by this value more (default 0 mm)
 
 // A single hole in the organizer
 // parameters:
@@ -30,8 +30,8 @@ module simple_hole(position=[0,0], size, depth=-1, center=false, centerX=false, 
     
     hole_bottom = (depth==-1) ? $holes_bottom_thickness : $holes_bottom_part_top - depth;
 
-    cornerX = min([size[0]/8, 10]); // 5 mm or eight of the hole
-    cornerY = min([size[1]/8, 10]); // 5 mm or eight of the hole
+    cornerX = min([size[0]/3, 15]); // 5 mm or eight of the hole
+    cornerY = min([size[1]/3, 15]); // 5 mm or eight of the hole
     cornerZ = hole_bottom+min([($holes_bottom_part_top-hole_bottom)/8, 5]); // 5 mm or eight of the hole
  
     points=[
@@ -181,7 +181,7 @@ module cubic_hole(position=[0,0], size, depth=-1,  bury=true, center=false, cent
 // $holes_finger_hole_radius - radius of the hole for fingers 
 // $holes_finger_hole_extend - how far should the finger hole reach
 
-module cubic_hole_with_finger_holes(position=[0,0], size, fingers_align_x=false, depth=-1, bury=true, center=false, centerX=false, centerY=false) {
+module cubic_hole_with_finger_holes(position=[0,0], size, fingers_align_x=false, fingers_additional_depth=0, depth=-1, bury=true, center=false, centerX=false, centerY=false) {
     
     include <holes_default_parameters.scad>
     
@@ -189,16 +189,25 @@ module cubic_hole_with_finger_holes(position=[0,0], size, fingers_align_x=false,
         children();
     };
     
-    translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top])
     if(fingers_align_x) {
-        rotate([0,90,0])
-           cylinder(h=size[0]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top-$holes_finger_additional_depth])
+            rotate([0,90,0])
+                cylinder(h=size[0]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        
+        if($holes_finger_additional_depth > 0) 
+            translate([center || centerX ? position[0]-size[0]/2-$holes_finger_hole_extend : position[0]-$holes_finger_hole_radius, center || centerY ? position[1]-$holes_finger_hole_radius : position[1] + size[1]/2-$holes_finger_hole_radius, $holes_bottom_part_top-$holes_finger_additional_depth])
+                cube([size[0]+$holes_finger_hole_extend*2, 2*$holes_finger_hole_radius, $holes_finger_additional_depth+1]);
     } else {
-        rotate([90,0,0])
-           cylinder(h=size[1]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top-$holes_finger_additional_depth])
+            rotate([90,0,0])
+                cylinder(h=size[1]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        
+                if($holes_finger_additional_depth > 0) 
+                    translate([center || centerX ? position[0] - $holes_finger_hole_radius : position[0]+size[0]/2-$holes_finger_hole_radius, center || centerY ? position[1]-size[1]/2 -$holes_finger_hole_extend: position[1]-$holes_finger_hole_extend, $holes_bottom_part_top-$holes_finger_additional_depth])
+                        cube([2*$holes_finger_hole_radius, size[1]+$holes_finger_hole_extend*2, $holes_finger_additional_depth+1 ]);
+                
+        
     }
-    echo($holes_finger_hole_extend=$holes_finger_hole_extend, $holes_finger_hole_radius=$holes_finger_hole_radius);
-    
 }
 
 
@@ -230,13 +239,26 @@ module hole_with_finger_holes(position=[0,0], size, fingers_align_x=false, depth
         children();
     };
     
-    translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top])
+    
     if(fingers_align_x) {
-        rotate([0,90,0])
-           cylinder(h=size[0]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top-$holes_finger_additional_depth])
+            rotate([0,90,0])
+                cylinder(h=size[0]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        
+        
+        if($holes_finger_additional_depth > 0) 
+            translate([center || centerX ? position[0]-size[0]/2-$holes_finger_hole_extend : position[0]-$holes_finger_hole_radius, center || centerY ? position[1]-$holes_finger_hole_radius : position[1] + size[1]/2-$holes_finger_hole_radius, $holes_bottom_part_top-$holes_finger_additional_depth])
+                cube([size[0]+$holes_finger_hole_extend*2, 2*$holes_finger_hole_radius, $holes_finger_additional_depth+1]);
+        
     } else {
-        rotate([90,0,0])
-           cylinder(h=size[1]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+        translate([center || centerX ? position[0] : position[0]+size[0]/2, center || centerY ? position[1] : position[1] + size[1]/2, $holes_bottom_part_top-$holes_finger_additional_depth])
+            rotate([90,0,0])
+                cylinder(h=size[1]+$holes_finger_hole_extend*2, r=$holes_finger_hole_radius, center=true);
+
+                if($holes_finger_additional_depth > 0) 
+                    translate([center || centerX ? position[0] - $holes_finger_hole_radius : position[0]+size[0]/2-$holes_finger_hole_radius, center || centerY ? position[1]-size[1]/2 -$holes_finger_hole_extend: position[1]-$holes_finger_hole_extend, $holes_bottom_part_top-$holes_finger_additional_depth])
+                        cube([2*$holes_finger_hole_radius, size[1]+$holes_finger_hole_extend*2, $holes_finger_additional_depth+1 ]);
+
     }   
     
 }
@@ -292,6 +314,10 @@ module vertical_round_hole(position=[0,0], radius, diameter, depth=-1, align_x=f
     translate([(center || centerX)?position[0]:position[0]+r, (center || centerY)?position[1]:position[1]+r, depth == -1 ? $holes_bottom_thickness : $holes_bottom_part_top-depth])  
        cylinder(h=($holes_bottom_top_overlap+(depth==-1 ? $holes_bottom_part_top-$holes_bottom_thickness: depth)), r=r);   
 }
+
+//$holes_bottom_part_top=30;
+//$holes_finger_additional_depth = 15;
+//hole_with_finger_holes(size=[21, 13], position=[20, 10], centerX=true, fingers_align_x=false);
 
 
 //use <2D/battery_symbol_2D.scad>
